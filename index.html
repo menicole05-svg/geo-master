@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#3b5bdb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Geo Master">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Geo Master: Countries, Capitals, Flags and Maps</title>
+<style>
+:root{
+  --bg:#f4f6fb;--card:#ffffff;--ink:#1a2033;--mute:#6a7390;--line:#e2e6f0;
+  --brand:#3b5bdb;--brand-ink:#ffffff;--brand-soft:#e7ecff;
+  --ok:#2b9348;--okbg:#e3f6ea;--bad:#d62839;--badbg:#fde6e8;
+  --ocean:#dbe8f6;--land:#cfd6e4;--grat:rgba(60,80,120,.12);
+  --Africa:#e8a33d;--Asia:#e5646e;--Europe:#5b8def;--NorthAmerica:#4cae7a;--SouthAmerica:#a66fd8;--Oceania:#2cb5c0;--Antarctica:#d5dcea;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0f1420;--card:#171e2e;--ink:#e8ecf6;--mute:#93a0bf;--line:#26304a;
+    --brand:#7c9bff;--brand-ink:#0b1020;--brand-soft:#1f2a4a;
+    --ok:#5bd17f;--okbg:#14301f;--bad:#ff6b7a;--badbg:#3a1a20;
+    --ocean:#142036;--land:#2a3550;--grat:rgba(180,200,255,.08);
+    --Antarctica:#3a4560;}
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+a{color:inherit;text-decoration:none}
+button,select,input{font:inherit;color:inherit}
+.app{max-width:980px;margin:0 auto;padding:12px 14px 40px}
+header.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0 12px}
+.logo{font-weight:800;font-size:20px;letter-spacing:-.3px;margin-right:6px}
+.logo span{color:var(--brand)}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav a{padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:600;color:var(--mute)}
+nav a.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:620px){.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+h1,h2,h3{margin:0 0 6px;letter-spacing:-.2px}
+h1{font-size:26px}h2{font-size:20px}h3{font-size:16px}
+p{margin:0 0 8px}
+.mute{color:var(--mute)}
+.small{font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:650}
+.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn.sm{padding:6px 10px;font-size:14px;border-radius:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:14px;font-weight:600}
+.chip.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+select,input[type=text],textarea{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.stat{text-align:center}
+.stat b{display:block;font-size:28px;line-height:1.1}
+.tile{display:block;cursor:pointer}
+.tile:hover{border-color:var(--brand)}
+.tile .ico{font-size:26px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .3s}
+.row{display:flex;gap:10px;align-items:center}
+.sp{justify-content:space-between}
+.wrap{flex-wrap:wrap}
+.pb{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pb .bar{flex:1}
+
+/* flags */
+.flag{--fw:64px;display:inline-block;width:var(--fw);aspect-ratio:3/2;border-radius:6px;overflow:hidden;box-shadow:0 0 0 1px var(--line);background:#fff;vertical-align:middle;flex:none}
+.flag svg{width:100%;height:100%;display:block}
+.flag.emo{aspect-ratio:auto;width:auto;display:inline-flex;align-items:center;justify-content:center;font-size:calc(var(--fw)*.62);line-height:1;box-shadow:none;background:none}
+.flag.sm{--fw:34px}.flag.lg{--fw:120px}.flag.xl{--fw:210px}
+
+/* study session */
+.big{font-size:30px;font-weight:800;letter-spacing:-.5px;text-align:center;overflow-wrap:anywhere}
+.fc{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;cursor:pointer;user-select:none}
+.fc .lab{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);font-weight:700}
+.fc .ans{font-size:30px;font-weight:800;color:var(--brand);overflow-wrap:anywhere}
+.fc .det{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;align-items:center;font-size:15px}
+.note{font-size:13px;color:var(--mute);max-width:520px}
+.choices{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:12px}
+@media(max-width:520px){.choices{grid-template-columns:1fr}}
+.choice{padding:14px;border-radius:12px;border:2px solid var(--line);background:var(--card);cursor:pointer;font-weight:650;text-align:left}
+.choice:hover{border-color:var(--brand)}
+.choice.ok{border-color:var(--ok);background:var(--okbg)}
+.choice.bad{border-color:var(--bad);background:var(--badbg)}
+.choice[disabled]{cursor:default}
+.fb{margin-top:12px;padding:12px 14px;border-radius:12px}
+.fb.ok{background:var(--okbg);border:1px solid var(--ok)}
+.fb.bad{background:var(--badbg);border:1px solid var(--bad)}
+.typebox{display:flex;gap:8px;margin-top:14px}
+.typebox input{flex:1;font-size:18px;padding:12px}
+.missed{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+
+/* map */
+.mapwrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--ocean)}
+svg.map{display:block;width:100%;height:auto;cursor:grab;touch-action:none;user-select:none}
+svg.map:active{cursor:grabbing}
+svg .ocean{fill:var(--ocean)}
+svg .grat{fill:none;stroke:var(--grat);stroke-width:1;vector-effect:non-scaling-stroke}
+.shape{fill:var(--land);stroke:var(--card);stroke-width:.6;vector-effect:non-scaling-stroke;fill-rule:evenodd;cursor:pointer;transition:opacity .2s}
+.mk{fill:var(--land);stroke:var(--ink);stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer}
+.by-cont .shape[data-cont="Africa"],.by-cont .mk[data-cont="Africa"]{fill:var(--Africa)}
+.by-cont .shape[data-cont="Asia"],.by-cont .mk[data-cont="Asia"]{fill:var(--Asia)}
+.by-cont .shape[data-cont="Europe"],.by-cont .mk[data-cont="Europe"]{fill:var(--Europe)}
+.by-cont .shape[data-cont="North America"],.by-cont .mk[data-cont="North America"]{fill:var(--NorthAmerica)}
+.by-cont .shape[data-cont="South America"],.by-cont .mk[data-cont="South America"]{fill:var(--SouthAmerica)}
+.by-cont .shape[data-cont="Oceania"],.by-cont .mk[data-cont="Oceania"]{fill:var(--Oceania)}
+.by-cont .shape[data-cont="Antarctica"]{fill:var(--Antarctica)}
+.shape:hover,.mk:hover{filter:brightness(1.12)}
+.shape.dim,.mk.dim{opacity:.22;pointer-events:none}
+.shape.tgt,.mk.tgt{stroke:var(--brand);stroke-width:2.5;fill:var(--brand)!important}
+.shape.ok,.mk.ok{fill:var(--ok)!important}
+.shape.bad,.mk.bad{fill:var(--bad)!important}
+.zoomctl{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
+.zoomctl button{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:18px;font-weight:700}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:4px 8px;border-radius:8px;font-size:13px;display:none;z-index:9}
+.prompt{padding:12px 14px;border-radius:12px;background:var(--brand-soft);margin:10px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;min-height:54px}
+.prompt .q{font-size:19px}
+.prompt.ok{background:var(--okbg)}.prompt.bad{background:var(--badbg)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:8px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.info{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.alist .grp{margin:14px 0 6px;font-weight:800;display:flex;align-items:center;gap:8px}
+.alist .it{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.alist .it .n{font-weight:650;flex:1.2}.alist .it .c{flex:1;color:var(--mute)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+details summary{cursor:pointer;font-weight:650}
+textarea{width:100%;min-height:80px;font:12px/1.3 ui-monospace,monospace}
+.banner{padding:10px 12px;border-radius:12px;background:var(--badbg);border:1px solid var(--bad);font-size:14px;margin-bottom:10px}
+
+nav a b{font-weight:400;margin-right:4px}
+.hero{text-align:center;padding:14px 0 4px}
+.hero-t{font-size:40px;font-weight:900;letter-spacing:-1.2px;line-height:1.05}
+.hero-t span{color:var(--brand)}
+.hero-s{display:inline-block;background:var(--brand);color:var(--brand-ink);padding:2px 14px;font-size:14px;margin-top:6px;border-radius:4px}
+.menu{display:flex;flex-direction:column;gap:14px;max-width:360px;margin:22px auto 0}
+.mbtn{height:58px;border-radius:16px;border:2px solid var(--line);background:var(--card);font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 3px 0 var(--line);display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.mbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.m1{border-color:#b39ddb}.m2{border-color:#e6cf6b}.m3{border-color:#8fd19e}.m4{border-color:#7fc4e8}.m5{border-color:#f2a3a3}
+.mbtn .bd{font-size:12px;background:var(--bad);color:#fff;border-radius:99px;padding:1px 8px;font-weight:700}
+.mbtn.sm2{height:48px;font-size:16px;max-width:230px;margin:2px auto 0;border-color:#8fd19e}
+.iconrow{display:flex;justify-content:center;gap:14px;margin:22px 0 6px}
+.ibtn{width:56px;height:56px;border-radius:16px;border:1px solid var(--line);background:var(--card);font-size:22px;cursor:pointer;box-shadow:0 3px 0 var(--line);display:flex;align-items:center;justify-content:center;flex-direction:column;line-height:1}
+.ibtn i{font-style:normal;font-size:10px;color:var(--mute);margin-top:3px;font-weight:600}
+.mini{position:relative;margin:26px -14px 0;height:170px;overflow:hidden;border-radius:22px 22px 0 0;background:linear-gradient(var(--bg),var(--ocean))}
+.mini svg{position:absolute;inset:0;width:100%;height:100%;opacity:.9}
+.flagrow{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:space-around;padding:0 10px}
+.flagrow span{display:block;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}
+.hintinfo{max-width:360px;margin:8px auto 0;text-align:center}
+.trophy{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.trophy .t{font-size:28px}.trophy.lock{opacity:.5;filter:grayscale(1)}
+@media(max-width:700px){
+  .logo{display:none}
+  header.top{padding:0}
+  .app{padding-bottom:92px}
+  nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom));gap:0;flex-wrap:nowrap}
+  nav a{flex:1;display:flex;flex-direction:column;align-items:center;border:none;background:none;border-radius:10px;padding:6px 0;font-size:11px;font-weight:650}
+  nav a b{font-size:20px;margin:0 0 1px}
+  nav a.on{background:var(--brand-soft);color:var(--brand)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="logo">Geo<span>Master</span></div>
+    <nav id="nav">
+      <a href="#home" data-r="home"><b>🏠</b><span>Home</span></a>
+      <a href="#map" data-r="map"><b>🗺️</b><span>Map</span></a>
+      <a href="#cards" data-r="cards"><b>🃏</b><span>Cards</span></a>
+      <a href="#quiz" data-r="quiz"><b>✅</b><span>Quiz</span></a>
+      <a href="#type" data-r="type"><b>⌨️</b><span>Type</span></a>
+      <a href="#atlas" data-r="atlas"><b>📖</b><span>Atlas</span></a>
+    </nav>
+  </header>
+  <main id="view"></main>
+</div>
+<div id="tip"></div>
+
+<!-- Optional libraries: only used to get the world map shapes. The app works without them (dot map). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.9/datamaps.world.min.js"></script>
+
+<script>
+"use strict";
+/* =========================================================
+   DATA: 193 UN members + Vatican City + Palestine = 195
+   name|iso2|iso3|capital|continent|lat|lng (of the capital)
+   ========================================================= */
+const CC={AF:'Africa',AS:'Asia',EU:'Europe',NA:'North America',SA:'South America',OC:'Oceania'};
+const RAW=`Algeria|DZ|DZA|Algiers|AF|36.75|3.06
+Angola|AO|AGO|Luanda|AF|-8.84|13.23
+Benin|BJ|BEN|Porto-Novo|AF|6.50|2.63
+Botswana|BW|BWA|Gaborone|AF|-24.65|25.91
+Burkina Faso|BF|BFA|Ouagadougou|AF|12.37|-1.52
+Burundi|BI|BDI|Gitega|AF|-3.43|29.92
+Cabo Verde|CV|CPV|Praia|AF|14.93|-23.51
+Cameroon|CM|CMR|Yaoundé|AF|3.87|11.52
+Central African Republic|CF|CAF|Bangui|AF|4.36|18.56
+Chad|TD|TCD|N'Djamena|AF|12.13|15.05
+Comoros|KM|COM|Moroni|AF|-11.70|43.26
+Republic of the Congo|CG|COG|Brazzaville|AF|-4.27|15.28
+Democratic Republic of the Congo|CD|COD|Kinshasa|AF|-4.32|15.31
+Côte d'Ivoire|CI|CIV|Yamoussoukro|AF|6.82|-5.28
+Djibouti|DJ|DJI|Djibouti|AF|11.59|43.15
+Egypt|EG|EGY|Cairo|AF|30.04|31.24
+Equatorial Guinea|GQ|GNQ|Malabo|AF|3.75|8.78
+Eritrea|ER|ERI|Asmara|AF|15.34|38.93
+Eswatini|SZ|SWZ|Mbabane|AF|-26.31|31.13
+Ethiopia|ET|ETH|Addis Ababa|AF|9.03|38.74
+Gabon|GA|GAB|Libreville|AF|0.39|9.45
+Gambia|GM|GMB|Banjul|AF|13.45|-16.58
+Ghana|GH|GHA|Accra|AF|5.60|-0.19
+Guinea|GN|GIN|Conakry|AF|9.64|-13.58
+Guinea-Bissau|GW|GNB|Bissau|AF|11.86|-15.60
+Kenya|KE|KEN|Nairobi|AF|-1.29|36.82
+Lesotho|LS|LSO|Maseru|AF|-29.31|27.48
+Liberia|LR|LBR|Monrovia|AF|6.30|-10.80
+Libya|LY|LBY|Tripoli|AF|32.89|13.19
+Madagascar|MG|MDG|Antananarivo|AF|-18.88|47.51
+Malawi|MW|MWI|Lilongwe|AF|-13.96|33.77
+Mali|ML|MLI|Bamako|AF|12.64|-8.00
+Mauritania|MR|MRT|Nouakchott|AF|18.08|-15.98
+Mauritius|MU|MUS|Port Louis|AF|-20.16|57.50
+Morocco|MA|MAR|Rabat|AF|34.02|-6.84
+Mozambique|MZ|MOZ|Maputo|AF|-25.97|32.57
+Namibia|NA|NAM|Windhoek|AF|-22.56|17.08
+Niger|NE|NER|Niamey|AF|13.51|2.11
+Nigeria|NG|NGA|Abuja|AF|9.08|7.40
+Rwanda|RW|RWA|Kigali|AF|-1.95|30.06
+São Tomé and Príncipe|ST|STP|São Tomé|AF|0.34|6.73
+Senegal|SN|SEN|Dakar|AF|14.72|-17.47
+Seychelles|SC|SYC|Victoria|AF|-4.62|55.45
+Sierra Leone|SL|SLE|Freetown|AF|8.48|-13.23
+Somalia|SO|SOM|Mogadishu|AF|2.05|45.32
+South Africa|ZA|ZAF|Pretoria|AF|-25.75|28.19
+South Sudan|SS|SSD|Juba|AF|4.85|31.58
+Sudan|SD|SDN|Khartoum|AF|15.50|32.56
+Tanzania|TZ|TZA|Dodoma|AF|-6.16|35.75
+Togo|TG|TGO|Lomé|AF|6.13|1.22
+Tunisia|TN|TUN|Tunis|AF|36.81|10.18
+Uganda|UG|UGA|Kampala|AF|0.35|32.58
+Zambia|ZM|ZMB|Lusaka|AF|-15.39|28.32
+Zimbabwe|ZW|ZWE|Harare|AF|-17.83|31.05
+Afghanistan|AF|AFG|Kabul|AS|34.53|69.17
+Armenia|AM|ARM|Yerevan|AS|40.18|44.51
+Azerbaijan|AZ|AZE|Baku|AS|40.41|49.87
+Bahrain|BH|BHR|Manama|AS|26.23|50.59
+Bangladesh|BD|BGD|Dhaka|AS|23.81|90.41
+Bhutan|BT|BTN|Thimphu|AS|27.47|89.64
+Brunei|BN|BRN|Bandar Seri Begawan|AS|4.89|114.94
+Cambodia|KH|KHM|Phnom Penh|AS|11.56|104.93
+China|CN|CHN|Beijing|AS|39.90|116.41
+Cyprus|CY|CYP|Nicosia|AS|35.19|33.38
+Georgia|GE|GEO|Tbilisi|AS|41.72|44.79
+India|IN|IND|New Delhi|AS|28.61|77.21
+Indonesia|ID|IDN|Jakarta|AS|-6.21|106.85
+Iran|IR|IRN|Tehran|AS|35.69|51.39
+Iraq|IQ|IRQ|Baghdad|AS|33.31|44.37
+Israel|IL|ISR|Jerusalem|AS|31.77|35.22
+Japan|JP|JPN|Tokyo|AS|35.68|139.69
+Jordan|JO|JOR|Amman|AS|31.95|35.93
+Kazakhstan|KZ|KAZ|Astana|AS|51.17|71.43
+Kuwait|KW|KWT|Kuwait City|AS|29.38|47.99
+Kyrgyzstan|KG|KGZ|Bishkek|AS|42.87|74.59
+Laos|LA|LAO|Vientiane|AS|17.97|102.63
+Lebanon|LB|LBN|Beirut|AS|33.89|35.50
+Malaysia|MY|MYS|Kuala Lumpur|AS|3.14|101.69
+Maldives|MV|MDV|Malé|AS|4.18|73.51
+Mongolia|MN|MNG|Ulaanbaatar|AS|47.89|106.91
+Myanmar|MM|MMR|Naypyidaw|AS|19.76|96.08
+Nepal|NP|NPL|Kathmandu|AS|27.72|85.32
+North Korea|KP|PRK|Pyongyang|AS|39.04|125.76
+Oman|OM|OMN|Muscat|AS|23.59|58.41
+Pakistan|PK|PAK|Islamabad|AS|33.69|73.05
+Palestine|PS|PSE|Ramallah|AS|31.90|35.20
+Philippines|PH|PHL|Manila|AS|14.60|120.98
+Qatar|QA|QAT|Doha|AS|25.29|51.53
+Saudi Arabia|SA|SAU|Riyadh|AS|24.71|46.68
+Singapore|SG|SGP|Singapore|AS|1.35|103.82
+South Korea|KR|KOR|Seoul|AS|37.57|126.98
+Sri Lanka|LK|LKA|Sri Jayawardenepura Kotte|AS|6.90|79.95
+Syria|SY|SYR|Damascus|AS|33.51|36.28
+Tajikistan|TJ|TJK|Dushanbe|AS|38.56|68.77
+Thailand|TH|THA|Bangkok|AS|13.76|100.50
+Timor-Leste|TL|TLS|Dili|AS|-8.56|125.57
+Turkey|TR|TUR|Ankara|AS|39.93|32.86
+Turkmenistan|TM|TKM|Ashgabat|AS|37.96|58.33
+United Arab Emirates|AE|ARE|Abu Dhabi|AS|24.45|54.38
+Uzbekistan|UZ|UZB|Tashkent|AS|41.30|69.24
+Vietnam|VN|VNM|Hanoi|AS|21.03|105.85
+Yemen|YE|YEM|Sana'a|AS|15.37|44.19
+Albania|AL|ALB|Tirana|EU|41.33|19.82
+Andorra|AD|AND|Andorra la Vella|EU|42.51|1.52
+Austria|AT|AUT|Vienna|EU|48.21|16.37
+Belarus|BY|BLR|Minsk|EU|53.90|27.57
+Belgium|BE|BEL|Brussels|EU|50.85|4.35
+Bosnia and Herzegovina|BA|BIH|Sarajevo|EU|43.86|18.41
+Bulgaria|BG|BGR|Sofia|EU|42.70|23.32
+Croatia|HR|HRV|Zagreb|EU|45.81|15.98
+Czechia|CZ|CZE|Prague|EU|50.08|14.44
+Denmark|DK|DNK|Copenhagen|EU|55.68|12.57
+Estonia|EE|EST|Tallinn|EU|59.44|24.75
+Finland|FI|FIN|Helsinki|EU|60.17|24.94
+France|FR|FRA|Paris|EU|48.86|2.35
+Germany|DE|DEU|Berlin|EU|52.52|13.40
+Greece|GR|GRC|Athens|EU|37.98|23.73
+Hungary|HU|HUN|Budapest|EU|47.50|19.04
+Iceland|IS|ISL|Reykjavik|EU|64.15|-21.94
+Ireland|IE|IRL|Dublin|EU|53.35|-6.26
+Italy|IT|ITA|Rome|EU|41.90|12.50
+Latvia|LV|LVA|Riga|EU|56.95|24.11
+Liechtenstein|LI|LIE|Vaduz|EU|47.14|9.52
+Lithuania|LT|LTU|Vilnius|EU|54.69|25.28
+Luxembourg|LU|LUX|Luxembourg City|EU|49.61|6.13
+Malta|MT|MLT|Valletta|EU|35.90|14.51
+Moldova|MD|MDA|Chișinău|EU|47.01|28.86
+Monaco|MC|MCO|Monaco|EU|43.74|7.42
+Montenegro|ME|MNE|Podgorica|EU|42.44|19.26
+Netherlands|NL|NLD|Amsterdam|EU|52.37|4.90
+North Macedonia|MK|MKD|Skopje|EU|42.00|21.43
+Norway|NO|NOR|Oslo|EU|59.91|10.75
+Poland|PL|POL|Warsaw|EU|52.23|21.01
+Portugal|PT|PRT|Lisbon|EU|38.72|-9.14
+Romania|RO|ROU|Bucharest|EU|44.43|26.10
+Russia|RU|RUS|Moscow|EU|55.76|37.62
+San Marino|SM|SMR|San Marino|EU|43.94|12.45
+Serbia|RS|SRB|Belgrade|EU|44.79|20.45
+Slovakia|SK|SVK|Bratislava|EU|48.15|17.11
+Slovenia|SI|SVN|Ljubljana|EU|46.06|14.51
+Spain|ES|ESP|Madrid|EU|40.42|-3.70
+Sweden|SE|SWE|Stockholm|EU|59.33|18.07
+Switzerland|CH|CHE|Bern|EU|46.95|7.45
+Ukraine|UA|UKR|Kyiv|EU|50.45|30.52
+United Kingdom|GB|GBR|London|EU|51.51|-0.13
+Vatican City|VA|VAT|Vatican City|EU|41.90|12.45
+Antigua and Barbuda|AG|ATG|Saint John's|NA|17.12|-61.85
+Bahamas|BS|BHS|Nassau|NA|25.05|-77.36
+Barbados|BB|BRB|Bridgetown|NA|13.10|-59.61
+Belize|BZ|BLZ|Belmopan|NA|17.25|-88.77
+Canada|CA|CAN|Ottawa|NA|45.42|-75.70
+Costa Rica|CR|CRI|San José|NA|9.93|-84.08
+Cuba|CU|CUB|Havana|NA|23.11|-82.37
+Dominica|DM|DMA|Roseau|NA|15.30|-61.39
+Dominican Republic|DO|DOM|Santo Domingo|NA|18.49|-69.93
+El Salvador|SV|SLV|San Salvador|NA|13.69|-89.19
+Grenada|GD|GRD|Saint George's|NA|12.06|-61.75
+Guatemala|GT|GTM|Guatemala City|NA|14.63|-90.51
+Haiti|HT|HTI|Port-au-Prince|NA|18.59|-72.31
+Honduras|HN|HND|Tegucigalpa|NA|14.07|-87.19
+Jamaica|JM|JAM|Kingston|NA|17.97|-76.79
+Mexico|MX|MEX|Mexico City|NA|19.43|-99.13
+Nicaragua|NI|NIC|Managua|NA|12.11|-86.24
+Panama|PA|PAN|Panama City|NA|8.98|-79.52
+Saint Kitts and Nevis|KN|KNA|Basseterre|NA|17.30|-62.72
+Saint Lucia|LC|LCA|Castries|NA|14.01|-60.99
+Saint Vincent and the Grenadines|VC|VCT|Kingstown|NA|13.16|-61.22
+Trinidad and Tobago|TT|TTO|Port of Spain|NA|10.66|-61.51
+United States|US|USA|Washington, D.C.|NA|38.91|-77.04
+Argentina|AR|ARG|Buenos Aires|SA|-34.60|-58.38
+Bolivia|BO|BOL|Sucre|SA|-19.03|-65.26
+Brazil|BR|BRA|Brasília|SA|-15.79|-47.88
+Chile|CL|CHL|Santiago|SA|-33.45|-70.67
+Colombia|CO|COL|Bogotá|SA|4.71|-74.07
+Ecuador|EC|ECU|Quito|SA|-0.18|-78.47
+Guyana|GY|GUY|Georgetown|SA|6.80|-58.16
+Paraguay|PY|PRY|Asunción|SA|-25.26|-57.58
+Peru|PE|PER|Lima|SA|-12.05|-77.04
+Suriname|SR|SUR|Paramaribo|SA|5.85|-55.20
+Uruguay|UY|URY|Montevideo|SA|-34.90|-56.16
+Venezuela|VE|VEN|Caracas|SA|10.48|-66.90
+Australia|AU|AUS|Canberra|OC|-35.28|149.13
+Fiji|FJ|FJI|Suva|OC|-18.14|178.44
+Kiribati|KI|KIR|Tarawa|OC|1.45|173.03
+Marshall Islands|MH|MHL|Majuro|OC|7.09|171.38
+Micronesia|FM|FSM|Palikir|OC|6.92|158.16
+Nauru|NR|NRU|Yaren|OC|-0.55|166.92
+New Zealand|NZ|NZL|Wellington|OC|-41.29|174.78
+Palau|PW|PLW|Ngerulmud|OC|7.50|134.62
+Papua New Guinea|PG|PNG|Port Moresby|OC|-9.44|147.18
+Samoa|WS|WSM|Apia|OC|-13.83|-171.76
+Solomon Islands|SB|SLB|Honiara|OC|-9.43|159.95
+Tonga|TO|TON|Nuku'alofa|OC|-21.14|-175.20
+Tuvalu|TV|TUV|Funafuti|OC|-8.52|179.20
+Vanuatu|VU|VUT|Port Vila|OC|-17.73|168.32`;
+const C=RAW.split('\n').map(l=>{const p=l.split('|');return{name:p[0],iso2:p[1],iso3:p[2],cap:p[3],cont:CC[p[4]],lat:+p[5],lng:+p[6]}});
+const C2={},C3={};C.forEach(c=>{C2[c.iso2]=c;C3[c.iso3]=c});
+const CONTS=['Africa','Asia','Europe','North America','South America','Oceania'];
+const ALLCONTS=CONTS.concat(['Antarctica']);
+const CONTCSS={'Africa':'var(--Africa)','Asia':'var(--Asia)','Europe':'var(--Europe)','North America':'var(--NorthAmerica)','South America':'var(--SouthAmerica)','Oceania':'var(--Oceania)','Antarctica':'var(--Antarctica)'};
+const ALIAS={US:['USA','United States of America','America','US'],GB:['UK','Britain','Great Britain','England'],AE:['UAE'],CZ:['Czech Republic'],MM:['Burma'],SZ:['Swaziland'],TL:['East Timor'],CI:['Ivory Coast','Cote d Ivoire'],CV:['Cape Verde'],CD:['DR Congo','DRC','Congo-Kinshasa','Congo Kinshasa','Democratic Republic of Congo'],CG:['Congo','Congo-Brazzaville','Congo Brazzaville','Republic of Congo'],KR:['Korea','Republic of Korea'],KP:['DPRK'],RU:['Russian Federation'],MK:['Macedonia'],VA:['Holy See','Vatican'],TR:['Türkiye','Turkiye'],BS:['The Bahamas'],GM:['The Gambia'],ST:['Sao Tome and Principe','Sao Tome'],KN:['St Kitts and Nevis','St Kitts'],LC:['St Lucia'],VC:['St Vincent','St Vincent and the Grenadines'],BA:['Bosnia'],FM:['Federated States of Micronesia'],AG:['Antigua'],TT:['Trinidad'],PG:['PNG'],IR:['Persia'],LA:['Lao PDR'],BN:['Brunei Darussalam'],NL:['Holland']};
+const CAPALT={BO:['La Paz'],ZA:['Cape Town','Bloemfontein'],PS:['East Jerusalem','Jerusalem'],LK:['Colombo','Kotte','Sri Jayawardenepura'],LU:['Luxembourg'],US:['Washington','Washington DC','DC'],MX:['Mexico'],PA:['Panama'],GT:['Guatemala'],KW:['Kuwait'],VA:['Vatican'],KZ:['Nur-Sultan'],SM:['City of San Marino'],SG:['Singapore City'],DJ:['Djibouti City']};
+const CAPNOTE={BO:'Sucre is the constitutional capital. La Paz is the seat of government.',ZA:'Three capitals: Pretoria (executive), Cape Town (legislative), Bloemfontein (judicial).',IL:'Jerusalem is Israel\'s declared capital, but its status is disputed and most embassies are in Tel Aviv.',PS:'Ramallah is the administrative seat. Palestine claims East Jerusalem as its capital.',LK:'Sri Jayawardenepura Kotte is the legislative capital. Colombo is the commercial capital.',NL:'Amsterdam is the capital. The government sits in The Hague.',BI:'Gitega is the political capital. Bujumbura is the economic capital.',CI:'Yamoussoukro is the political capital. Abidjan is the largest city.',TZ:'Dodoma is the capital. Dar es Salaam is the largest city.',BJ:'Porto-Novo is the official capital. Cotonou is the seat of government.',MM:'Naypyidaw has been the capital since 2006. Yangon was the old capital.',KZ:'Astana (was renamed Nur-Sultan 2019 to 2022).',AU:'Not Sydney! Canberra was purpose-built as the capital.',BR:'Not Rio! Brasília has been the capital since 1960.',TR:'Not Istanbul! Ankara is the capital.',CA:'Not Toronto! Ottawa is the capital.',CH:'Bern is the federal city. Zurich and Geneva are bigger.',NZ:'Wellington, not Auckland.',US:'Washington, D.C. is not in any state.'};
+
+/* =========================================================
+   Helpers
+   ========================================================= */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const rnd=n=>Math.floor(Math.random()*n);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);const t=a[i];a[i]=a[j];a[j]=t}return a}
+const norm=s=>String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/&/g,'and').replace(/\bsaint\b/g,'st').replace(/[^a-z0-9]/g,'').replace(/^the/,'');
+function lev(a,b){if(a===b)return 0;const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=[];for(let j=0;j<=n;j++)p[j]=j;for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function judge(input,accepts){const a=norm(input);if(!a)return 'wrong';let close=false;for(const x of accepts){const n=norm(x);if(a===n)return 'exact';const tol=n.length>=9?2:n.length>=5?1:0;if(tol&&lev(a,n)<=tol)close=true}return close?'close':'wrong'}
+function dist(a,b){return Math.hypot(a.lat-b.lat,(a.lng-b.lng)*Math.cos((a.lat+b.lat)*Math.PI/360))}
+function emoji(iso){return String.fromCodePoint(127397+iso.charCodeAt(0),127397+iso.charCodeAt(1))}
+
+/* =========================================================
+   Flags (real SVG flags from a CDN when available, emoji otherwise)
+   ========================================================= */
+let FLAGS=null;
+function flagHTML(c,size){return '<span class="flag '+(size||'')+'" data-iso="'+c.iso2+'"></span>'}
+function hydrateFlags(root){$$('.flag[data-iso]',root||document).forEach(el=>{const iso=el.dataset.iso;if(FLAGS&&FLAGS[iso]){el.innerHTML=FLAGS[iso];el.classList.remove('emo')}else{el.textContent=emoji(iso);el.classList.add('emo')}})}
+(async function loadFlags(){
+  const urls=['https://cdn.jsdelivr.net/npm/country-flag-icons/string/3x2/index.js','https://cdn.jsdelivr.net/npm/country-flag-icons@1.5.19/string/3x2/index.js'];
+  for(const u of urls){try{const m=await import(u);const f=(m&&m.PH)?m:(m&&m.default&&m.default.PH?m.default:null);if(f){FLAGS=f;hydrateFlags(document);updateStatus();return}}catch(e){}}
+  updateStatus();
+})();
+
+/* =========================================================
+   Progress (spaced repetition, Leitner boxes). Saved in this browser.
+   ========================================================= */
+const KEY='geomaster.v1';
+let S={cards:{},cfg:{cont:'All',types:['cap','flag'],len:10},ans:0,right:0,hints:5};
+try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r){S.cards=r.cards||{};S.cfg=Object.assign(S.cfg,r.cfg||{});S.ans=r.ans||0;S.right=r.right||0;if(r.hints!=null)S.hints=r.hints}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const MIN=60000,DAY=86400000,INTV=[0,10*MIN,DAY,3*DAY,7*DAY,21*DAY];
+const hintN=()=>S.hints==null?5:S.hints;
+function grade(key,ok,soft){
+  const r=S.cards[key]||[0,0,0,0];r[2]++;S.ans=(S.ans||0)+1;
+  if(ok){S.right=(S.right||0)+1;if(S.right%10===0)S.hints=hintN()+1}
+  if(ok&&soft){r[1]=Date.now()+10*MIN}
+  else if(ok){r[0]=Math.min(5,r[0]+1);r[1]=Date.now()+INTV[r[0]]}
+  else{r[0]=Math.max(0,r[0]-2);r[3]++;r[1]=Date.now()+MIN}
+  S.cards[key]=r;save()}
+const TYPES={cap:{label:'Capitals',desc:'Country → capital'},capr:{label:'Reverse capitals',desc:'Capital → country'},flag:{label:'Flags',desc:'Flag → country'},cont:{label:'Continents',desc:'Country → continent'}};
+const CORE=['cap','flag','loc','cont'];
+function mastery(c){let s=0;CORE.forEach(t=>{const r=S.cards[c.iso2+':'+t];s+=r?r[0]/5:0});return s/CORE.length}
+function inCont(cont){return C.filter(c=>cont==='All'||c.cont===cont)}
+function buildQueue(types,cont,n){
+  const due=[],fresh=[],later=[],t=Date.now();
+  for(const c of inCont(cont))for(const ty of types){const key=c.iso2+':'+ty,r=S.cards[key],it={c:c,t:ty,key:key};if(!r)fresh.push(it);else if(r[1]<=t)due.push(it);else later.push(it)}
+  due.sort((a,b)=>S.cards[a.key][0]-S.cards[b.key][0]||Math.random()-.5);
+  let out=due.slice(0,n);
+  if(out.length<n)out=out.concat(shuffle(fresh).slice(0,n-out.length));
+  if(out.length<n){later.sort((a,b)=>S.cards[a.key][1]-S.cards[b.key][1]);out=out.concat(later.slice(0,n-out.length))}
+  return shuffle(out);
+}
+function queueStats(types,cont){let due=0,fresh=0,t=Date.now();for(const c of inCont(cont))for(const ty of types){const r=S.cards[c.iso2+':'+ty];if(!r)fresh++;else if(r[1]<=t)due++}return{due:due,fresh:fresh}}
+function dueTotal(){const t=Date.now();let n=0;for(const k in S.cards)if(S.cards[k][1]<=t)n++;return n}
+function pickKey(keys){const t=Date.now(),due=[],fresh=[],later=[];keys.forEach(k=>{const r=S.cards[k];if(!r)fresh.push(k);else if(r[1]<=t)due.push(k);else later.push(k)});
+  if(due.length){due.sort((a,b)=>S.cards[a][0]-S.cards[b][0]);return due[0]}
+  if(fresh.length)return fresh[rnd(fresh.length)];
+  later.sort((a,b)=>S.cards[a][1]-S.cards[b][1]);return later[0]}
+
+/* =========================================================
+   Question builder
+   ========================================================= */
+function qa(it){
+  const c=it.c;
+  switch(it.t){
+    case 'cap':return{label:'What is the capital of…',prompt:'<div class="big">'+esc(c.name)+'</div>',ans:c.cap,accepts:[c.cap].concat(CAPALT[c.iso2]||[]),opts:()=>nearby(c).map(x=>x.cap)};
+    case 'capr':return{label:'Which country has this capital?',prompt:'<div class="big">'+esc(c.cap)+'</div>',ans:c.name,accepts:[c.name].concat(ALIAS[c.iso2]||[]),opts:()=>nearby(c).map(x=>x.name)};
+    case 'flag':return{label:'Whose flag is this?',prompt:flagHTML(c,'xl'),ans:c.name,accepts:[c.name].concat(ALIAS[c.iso2]||[]),opts:()=>nearby(c).map(x=>x.name)};
+    case 'cont':return{label:'Which continent is this country in?',prompt:'<div class="big">'+esc(c.name)+'</div>',ans:c.cont,accepts:[c.cont],opts:()=>shuffle(CONTS.filter(x=>x!==c.cont)).slice(0,3)};
+  }
+}
+function nearby(c){return shuffle(C.filter(x=>x.iso2!==c.iso2).sort((a,b)=>dist(c,a)-dist(c,b)).slice(0,14)).slice(0,3)}
+function detailHTML(c){return '<div class="det">'+flagHTML(c,'lg')+'<div style="text-align:left"><div style="font-weight:800;font-size:18px">'+esc(c.name)+'</div><div>Capital: <b>'+esc(c.cap)+'</b></div><div>Continent: <b>'+esc(c.cont)+'</b></div></div></div>'+(CAPNOTE[c.iso2]?'<div class="note">'+esc(CAPNOTE[c.iso2])+'</div>':'')}
+
+/* =========================================================
+   Views / routing
+   ========================================================= */
+const view=$('#view');
+let sess=null;
+const VIEWS={};
+let AUTO=null;
+function route(){
+  let r=(location.hash||'#home').slice(1);if(!VIEWS[r])r='home';
+  clearTimeout(M.timer);sess=null;
+  $$('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.r===r));
+  VIEWS[r]();hydrateFlags(view);
+  if(AUTO&&AUTO.kind===r){const a=AUTO;AUTO=null;S.cfg.types=a.types;save();startSession(r)}
+}
+window.addEventListener('hashchange',()=>{route();window.scrollTo(0,0)});
+view.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(a&&ACT[a.dataset.act])ACT[a.dataset.act](a,e)});
+view.addEventListener('change',e=>{const a=e.target.closest('[data-chg]');if(a&&ACT[a.dataset.chg])ACT[a.dataset.chg](a,e)});
+document.addEventListener('keydown',e=>{const t=e.target.tagName;if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA')return;if(sess&&sess.key)sess.key(e)});
+const ACT={};
+
+/* ---------- Home ---------- */
+VIEWS.home=function(){
+  const due=dueTotal(),fl=['BR','JP','DE','US','CN','FR','PH'],ty=[8,-6,4,-10,6,-4,10],rt=[-8,5,-3,6,-6,4,-5];
+  const mini='<div class="mini">'+(M.ok?'<svg viewBox="0 20 960 340" preserveAspectRatio="xMidYMid slice">'+M.feats.filter(f=>f.id!=='ATA').map(f=>'<path d="'+f.d+'" fill="var(--land)" stroke="var(--bg)" stroke-width=".5"/>').join('')+'</svg>':'')+'<div class="flagrow">'+fl.map((iso,i)=>'<span style="transform:translateY('+ty[i]+'px) rotate('+rt[i]+'deg)">'+flagHTML(C2[iso],'sm')+'</span>').join('')+'</div></div>';
+  view.innerHTML='<div id="banner"></div><div class="hero"><div class="hero-t">Geo<span>Master</span></div><div class="hero-s">Guess the country</div></div>'+
+  '<div class="menu">'+
+    '<button class="mbtn m1" data-act="play" data-k="quiz" data-t="flag">🏳️ Play Flags</button>'+
+    '<button class="mbtn m2" data-act="playmap">🗺️ Play Maps</button>'+
+    '<button class="mbtn m3" data-act="play" data-k="quiz" data-t="cap">🏛️ Play Capitals</button>'+
+    '<button class="mbtn m4" data-act="goto" data-r="cards">🃏 Flashcards'+(due?' <span class="bd">'+due+' due</span>':'')+'</button>'+
+    '<button class="mbtn m5" data-act="goto" data-r="type">⌨️ Type-it</button>'+
+    '<button class="mbtn sm2" data-act="hintinfo">💡 Get hints ('+hintN()+')</button>'+
+  '</div><div class="hintinfo small mute" id="hintinfo" style="display:none">You earn 1 hint for every 10 correct answers. In Quiz, a hint removes 2 wrong choices. In Type-it, it shows the first letter. A hinted answer counts less toward mastery.</div>'+
+  '<div class="iconrow">'+
+    '<button class="ibtn" data-act="goto" data-r="stats" aria-label="Stats">📊<i>Stats</i></button>'+
+    '<button class="ibtn" data-act="goto" data-r="trophies" aria-label="Trophies">🏆<i>Trophies</i></button>'+
+    '<button class="ibtn" data-act="goto" data-r="atlas" aria-label="Atlas">📖<i>Atlas</i></button>'+
+    '<button class="ibtn" data-act="goto" data-r="settings" aria-label="Settings">⚙️<i>Settings</i></button>'+
+  '</div>'+mini;
+  updateStatus();
+};
+ACT.goto=a=>{location.hash='#'+a.dataset.r};
+ACT.play=a=>{AUTO={kind:a.dataset.k,types:a.dataset.t.split(',')};location.hash='#'+a.dataset.k};
+ACT.playmap=()=>{M.mode='locate';M.queue=[];location.hash='#map'};
+ACT.hintinfo=()=>{const e=$('#hintinfo');e.style.display=e.style.display==='none'?'block':'none'};
+
+/* ---------- Stats / Trophies / Settings ---------- */
+function known(t,minBox){let n=0;C.forEach(c=>{const r=S.cards[c.iso2+':'+t];if(r&&r[0]>=(minBox||3))n++});return n}
+function backHome(t){return '<div class="pb"><a class="btn sm" href="#home">← Home</a><h2 style="margin:0">'+t+'</h2></div>'}
+VIEWS.stats=function(){
+  const ans=S.ans||0,acc=ans?Math.round((S.right||0)/ans*100):0,started=C.filter(c=>CORE.some(t=>S.cards[c.iso2+':'+t])).length;
+  const all=C.reduce((s,c)=>s+mastery(c),0)/C.length;
+  view.innerHTML=backHome('Stats')+
+  '<div class="grid g3"><div class="card stat"><b>'+ans+'</b><span class="mute small">answers</span></div><div class="card stat"><b>'+acc+'%</b><span class="mute small">accuracy</span></div><div class="card stat"><b>'+Math.round(all*100)+'%</b><span class="mute small">mastery</span></div><div class="card stat"><b>'+started+'</b><span class="mute small">countries started</span></div><div class="card stat"><b>'+dueTotal()+'</b><span class="mute small">due now</span></div><div class="card stat"><b>'+hintN()+'</b><span class="mute small">hints</span></div></div>'+
+  '<div class="card" style="margin-top:12px"><h3>Known well (box 3 or higher)</h3>'+
+  [['cap','Capitals'],['capr','Reverse capitals'],['flag','Flags'],['cont','Continents'],['loc','Find on map'],['id','Name on map']].map(x=>{const k=known(x[0]);return '<div class="pb"><div style="width:130px;font-weight:650">'+x[1]+'</div><div class="bar"><i style="width:'+Math.round(k/C.length*100)+'%"></i></div><div class="small mute" style="width:64px;text-align:right">'+k+'/'+C.length+'</div></div>'}).join('')+'</div>'+
+  '<div class="card" style="margin-top:12px"><h3>By continent</h3>'+CONTS.map(ct=>{const cs=inCont(ct),m=cs.reduce((s,c)=>s+mastery(c),0)/cs.length;return '<div class="pb"><div style="width:130px;font-weight:650"><span class="dot" style="background:'+CONTCSS[ct]+'"></span> '+ct+'</div><div class="bar"><i style="width:'+Math.round(m*100)+'%;background:'+CONTCSS[ct]+'"></i></div><div class="small mute" style="width:44px;text-align:right">'+Math.round(m*100)+'%</div></div>'}).join('')+'</div>';
+};
+VIEWS.trophies=function(){
+  const cm=CONTS.some(ct=>{const cs=inCont(ct);return cs.reduce((s,c)=>s+mastery(c),0)/cs.length>=.6});
+  const started=C.filter(c=>CORE.some(t=>S.cards[c.iso2+':'+t])).length;
+  const T=[
+    ['👣','First steps','Answer 10 questions correctly',S.right||0,10],
+    ['📚','Quick learner','Answer 100 correctly',S.right||0,100],
+    ['🎓','Scholar','Answer 500 correctly',S.right||0,500],
+    ['🏳️','Flag collector','Know 50 flags well',known('flag'),50],
+    ['🏛️','Capital connoisseur','Know 50 capitals well',known('cap'),50],
+    ['🧭','Map explorer','Find 30 countries on the map',known('loc'),30],
+    ['🌍','Continent master','Reach 60% mastery in any continent',cm?1:0,1],
+    ['✈️','Globetrotter','Start learning all '+C.length+' countries',started,C.length],
+    ['👑','Flag master','Know all '+C.length+' flags well',known('flag'),C.length]];
+  view.innerHTML=backHome('Trophies')+'<div class="card">'+T.map(t=>{const ok=t[3]>=t[4];return '<div class="trophy '+(ok?'':'lock')+'"><div class="t">'+t[0]+'</div><div style="flex:1"><b>'+t[1]+'</b><div class="small mute">'+t[2]+'</div></div><div class="small '+(ok?'':'mute')+'">'+(ok?'Done ✓':Math.min(t[3],t[4])+'/'+t[4])+'</div></div>'}).join('')+'</div>';
+};
+VIEWS.settings=function(){
+  view.innerHTML=backHome('Settings')+
+  '<div class="card"><h3>Practice</h3><div class="row wrap" style="gap:14px"><label>Continent<br><select data-chg="setcont"><option>All</option>'+CONTS.map(c=>'<option'+(S.cfg.cont===c?' selected':'')+'>'+c+'</option>').join('')+'</select></label><label>Cards per round<br><select data-chg="setlen">'+[10,20,50].map(n=>'<option'+(S.cfg.len===n?' selected':'')+'>'+n+'</option>').join('')+'</select></label></div></div>'+
+  '<div class="card" style="margin-top:12px"><h3>Back up or move your progress</h3><p class="small mute">Progress is saved in this browser only. Copy the code to keep a backup, or paste a code to restore it.</p><textarea id="bk" spellcheck="false"></textarea><div class="row wrap" style="margin-top:8px"><button class="btn sm" data-act="export">Show my code</button><button class="btn sm" data-act="import">Load code</button><button class="btn sm danger" data-act="reset">Reset all progress</button></div><div id="bkmsg" class="small mute" style="margin-top:6px"></div></div>'+
+  '<p class="small mute" id="status" style="margin-top:12px"></p>';
+  $('select[data-chg="setcont"]').value=S.cfg.cont;updateStatus();
+};
+ACT.setcont=a=>{S.cfg.cont=a.value;save()};
+ACT.setlen=a=>{S.cfg.len=+a.value;save()};
+ACT.export=()=>{$('#bk').value=btoa(unescape(encodeURIComponent(JSON.stringify(S))));$('#bk').select()};
+ACT.import=()=>{try{const r=JSON.parse(decodeURIComponent(escape(atob($('#bk').value.trim()))));S.cards=r.cards||{};S.cfg=Object.assign(S.cfg,r.cfg||{});S.ans=r.ans||0;S.right=r.right||0;if(r.hints!=null)S.hints=r.hints;save();$('#bkmsg').textContent='Loaded.';setTimeout(route,600)}catch(e){$('#bkmsg').textContent='That code did not work.'}};
+ACT.reset=a=>{if(a.dataset.sure){S.cards={};save();route()}else{a.dataset.sure=1;a.textContent='Click again to erase everything'}};
+function updateStatus(){const el=$('#status');
+  if(el)el.textContent='Flags: '+(FLAGS?'real flag images':'emoji fallback (flag images could not load)')+'  •  Map: '+(M.ok?'full world map':'dot map fallback (map shapes could not load)');
+  const b=$('#banner');if(b)b.innerHTML=(!FLAGS&&/Windows/.test(navigator.userAgent)?'<div class="banner">Flag images did not load. On Windows, flag emoji can show as letters. Reload the page when you are online.</div>':'')}
+setTimeout(updateStatus,2500);
+
+/* ---------- Study sessions: flashcards, quiz, type ---------- */
+const KIND={cards:{t:'Flashcards',d:'Flip the card, then rate yourself honestly. Missed cards come back soon.'},quiz:{t:'Quiz',d:'Pick the right answer from 4 choices. Wrong choices are neighboring countries.'},type:{t:'Type-it',d:'Type the answer from memory. Small typos are forgiven.'}};
+['cards','quiz','type'].forEach(k=>{VIEWS[k]=()=>setupView(k)});
+function setupView(kind){
+  const m=KIND[kind],st=queueStats(S.cfg.types,S.cfg.cont);
+  view.innerHTML='<div class="card"><h2>'+m.t+'</h2><p class="mute">'+m.d+'</p>'+
+  '<h3 style="margin-top:14px">What to practice</h3><div class="chips">'+Object.keys(TYPES).map(t=>'<span class="chip '+(S.cfg.types.includes(t)?'on':'')+'" data-act="tgl" data-v="'+t+'" data-k="'+kind+'" title="'+TYPES[t].desc+'">'+TYPES[t].label+'</span>').join('')+'</div>'+
+  '<div class="row wrap" style="margin-top:14px;gap:14px"><label>Continent<br><select data-chg="cfgcont" data-k="'+kind+'"><option>All</option>'+CONTS.map(c=>'<option'+(S.cfg.cont===c?' selected':'')+'>'+c+'</option>').join('')+'</select></label>'+
+  '<label>Cards per round<br><select data-chg="cfglen" data-k="'+kind+'">'+[10,20,50].map(n=>'<option'+(S.cfg.len===n?' selected':'')+'>'+n+'</option>').join('')+'</select></label></div>'+
+  '<p class="small mute" style="margin-top:12px">'+st.due+' due for review • '+st.fresh+' not seen yet</p>'+
+  '<button class="btn primary" data-act="start" data-k="'+kind+'" style="margin-top:6px">Start</button></div>';
+  $('select[data-chg="cfgcont"]').value=S.cfg.cont;
+}
+ACT.tgl=a=>{const v=a.dataset.v,i=S.cfg.types.indexOf(v);if(i>=0){if(S.cfg.types.length>1)S.cfg.types.splice(i,1)}else S.cfg.types.push(v);save();setupView(a.dataset.k)};
+ACT.cfgcont=a=>{S.cfg.cont=a.value;save();setupView(a.dataset.k)};
+ACT.cfglen=a=>{S.cfg.len=+a.value;save();setupView(a.dataset.k)};
+ACT.start=a=>startSession(a.dataset.k);
+ACT.exit=()=>route();
+
+function startSession(kind){
+  const q=buildQueue(S.cfg.types,S.cfg.cont,S.cfg.len);
+  sess={kind:kind,queue:q,total:q.length,seen:new Set(),right:0,wrong:0,retried:new Set(),missed:[],cur:null,key:null,answered:false};
+  nextQ();
+}
+function nextQ(){if(!sess.queue.length)return finish();sess.cur=sess.queue.shift();sess.answered=false;sess.hinted=false;renderQ()}
+function resolve(ok){const it=sess.cur;grade(it.key,ok,!!sess.hinted);sess.seen.add(it.key);if(ok)sess.right++;else{sess.wrong++;if(!sess.missed.some(m=>m.key===it.key))sess.missed.push(it);if(!sess.retried.has(it.key)){sess.retried.add(it.key);sess.queue.splice(Math.min(sess.queue.length,3+rnd(3)),0,it)}}}
+function head(){const p=Math.round(sess.seen.size/sess.total*100);return '<div class="pb"><button class="btn sm" data-act="exit">← Exit</button><div class="bar"><i style="width:'+p+'%"></i></div><div class="small score">'+sess.seen.size+'/'+sess.total+'</div></div>'}
+function renderQ(){
+  const it=sess.cur,q=qa(it);sess.q=q;
+  if(sess.kind==='cards'){
+    view.innerHTML=head()+'<div class="card fc" data-act="flip"><div class="lab">'+esc(q.label)+'</div>'+q.prompt+'<div class="mute small">Tap to reveal (Space)</div></div>';
+    sess.key=e=>{if(e.code==='Space'||e.key==='Enter'){e.preventDefault();ACT.flip()}};
+  }else if(sess.kind==='quiz'){
+    const opts=shuffle([q.ans].concat(q.opts()));
+    view.innerHTML=head()+'<div class="card" style="text-align:center"><div class="lab mute small" style="text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:10px">'+esc(q.label)+'</div>'+q.prompt+'</div><div class="choices">'+opts.map((o,i)=>'<button class="choice" data-act="pick" data-v="'+esc(o)+'">'+(i+1)+'. '+esc(o)+'</button>').join('')+'</div><div class="row" style="margin-top:10px"><button class="btn sm" id="hintb" data-act="hint">💡 Hint ('+hintN()+')</button></div><div id="fb"></div>';
+    sess.key=e=>{if(sess.answered){if((e.code==='Space'||e.key==='Enter')&&e.target.tagName!=='BUTTON'){e.preventDefault();nextQ()}return}const n=+e.key;if(n>=1&&n<=4){const b=$$('.choice')[n-1];if(b)b.click()}};
+  }else{
+    view.innerHTML=head()+'<div class="card" style="text-align:center"><div class="lab mute small" style="text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:10px">'+esc(q.label)+'</div>'+q.prompt+'<form class="typebox" id="tf" autocomplete="off"><input type="text" id="ti" placeholder="Type your answer" autocapitalize="words" autocomplete="off" spellcheck="false"><button class="btn primary" type="submit">Check</button></form><div style="margin-top:10px"><button class="btn sm" type="button" id="hintb" data-act="hint">💡 Hint ('+hintN()+')</button></div><div id="hintline" class="small mute" style="margin-top:6px"></div></div><div id="fb"></div>';
+    $('#tf').addEventListener('submit',ev=>{ev.preventDefault();if(sess.answered)return;const v=$('#ti').value;const j=judge(v,q.accepts);answerFeedback(j!=='wrong',j==='close'?'Close enough. Check the spelling: ':'',v);});
+    sess.key=null;setTimeout(()=>{const i=$('#ti');if(i)i.focus()},30);
+  }
+  hydrateFlags(view);
+}
+ACT.flip=()=>{if(!sess||sess.kind!=='cards'||sess.answered)return;sess.answered=true;const q=sess.q,c=sess.cur.c;
+  view.innerHTML=head()+'<div class="card fc"><div class="lab">'+esc(q.label)+'</div><div class="ans">'+esc(q.ans)+'</div>'+detailHTML(c)+'</div><div class="row" style="margin-top:12px;gap:10px"><button class="btn bad" style="flex:1" data-act="cmiss">Missed it</button><button class="btn ok" style="flex:1" data-act="cknew">Knew it</button></div><p class="small mute" style="text-align:center">← missed • → knew it</p>';
+  sess.key=e=>{if(e.key==='ArrowLeft')ACT.cmiss();else if(e.key==='ArrowRight')ACT.cknew()};hydrateFlags(view)};
+ACT.cmiss=()=>{resolve(false);nextQ()};
+ACT.cknew=()=>{resolve(true);nextQ()};
+ACT.pick=a=>{if(sess.answered)return;const ok=norm(a.dataset.v)===norm(sess.q.ans);$$('.choice').forEach(b=>{b.disabled=true;if(norm(b.dataset.v)===norm(sess.q.ans))b.classList.add('ok');else if(b===a)b.classList.add('bad')});answerFeedback(ok,'',a.dataset.v)};
+function answerFeedback(ok,pre,given){
+  sess.answered=true;resolve(ok);const c=sess.cur.c,q=sess.q;
+  const fb=$('#fb');
+  fb.innerHTML='<div class="fb '+(ok?'ok':'bad')+'"><b>'+(ok?'Correct!':'Not quite.')+'</b> '+(ok?esc(pre):'')+(ok&&!pre?'':'')+' Answer: <b>'+esc(q.ans)+'</b>'+(!ok&&sess.kind==='type'&&given?' <span class="mute">(you typed "'+esc(given)+'")</span>':'')+detailHTML(c)+'<button class="btn primary" data-act="next" style="margin-top:10px">Next →</button></div>';
+  if(sess.kind==='type'){$('#ti').disabled=true;$('#tf button').disabled=true;sess.key=e=>{};}
+  const nb=$('[data-act="next"]');if(nb)nb.focus();hydrateFlags(view);
+}
+ACT.next=()=>nextQ();
+ACT.hint=()=>{if(!sess||sess.answered||sess.hinted)return;const b=$('#hintb');
+  if(hintN()<=0){if(b)b.textContent='No hints left. Earn 1 per 10 correct answers.';return}
+  if(sess.kind==='quiz'){shuffle($$('.choice').filter(x=>norm(x.dataset.v)!==norm(sess.q.ans))).slice(0,2).forEach(x=>{x.disabled=true;x.style.opacity='.3'})}
+  else if(sess.kind==='type'){const a=sess.q.ans;$('#hintline').textContent='Starts with "'+a[0]+'" • '+a.replace(/[\s-]/g,'').length+' letters'}
+  else return;
+  sess.hinted=true;S.hints=hintN()-1;save();if(b){b.textContent='💡 Hint used';b.disabled=true}};
+function finish(){
+  const tot=sess.right+sess.wrong,acc=tot?Math.round(sess.right/tot*100):0;
+  view.innerHTML='<div class="card"><h2>Round complete</h2><p class="mute">'+sess.right+' correct, '+sess.wrong+' missed ('+acc+'% accuracy)</p>'+
+  (sess.missed.length?'<h3 style="margin-top:12px">Review these</h3>'+sess.missed.map(m=>'<div class="missed">'+flagHTML(m.c,'sm')+'<div><b>'+esc(m.c.name)+'</b><div class="small mute">'+esc(m.c.cap)+' • '+esc(m.c.cont)+'</div></div></div>').join(''):'<p>Perfect round. 🎉</p>')+
+  '<div class="row wrap" style="margin-top:14px"><button class="btn primary" data-act="start" data-k="'+sess.kind+'">Another round</button><button class="btn" data-act="exit">Back</button></div></div>';
+  sess.key=null;hydrateFlags(view);
+}
+
+/* ---------- Atlas (study list) ---------- */
+VIEWS.atlas=function(){
+  view.innerHTML='<div class="card"><h2>Atlas</h2><p class="mute">Read first, drill later. Search by country, capital or continent.</p><input type="text" id="aq" placeholder="Search…" style="width:100%;padding:10px" data-chg="asearch"></div><div class="card alist" id="alist" style="margin-top:12px"></div>';
+  $('#aq').addEventListener('input',atlasList);atlasList();
+};
+function atlasList(){
+  const q=norm(($('#aq')||{value:''}).value);let h='';
+  CONTS.forEach(ct=>{const cs=C.filter(c=>c.cont===ct&&(!q||norm(c.name+c.cap+c.cont+(ALIAS[c.iso2]||[]).join('')).includes(q)));if(!cs.length)return;
+    h+='<div class="grp"><span class="dot" style="background:'+CONTCSS[ct]+'"></span>'+ct+' <span class="mute small">('+cs.length+')</span></div>';
+    cs.forEach(c=>{const m=mastery(c);h+='<div class="it">'+flagHTML(c,'sm')+'<div class="n">'+esc(c.name)+'</div><div class="c">'+esc(c.cap)+'</div><div class="dot" title="mastery '+Math.round(m*100)+'%" style="background:'+heat(m)+'"></div></div>'});
+  });
+  $('#alist').innerHTML=h||'<p class="mute">No matches.</p>';hydrateFlags($('#alist'));
+}
+
+/* =========================================================
+   MAP
+   ========================================================= */
+const NS='http://www.w3.org/2000/svg';
+const MW=960,MH=480;
+const px=lng=>(lng+180)*MW/360,py=lat=>(90-lat)*MH/180;
+const M={ok:false,feats:[],byId:{},shapeEl:{},markEl:{},mode:'explore',color:'cont',queue:[],cur:null,r:0,w:0,streak:0,answered:false,moved:false,timer:null,V:{k:1,x:0,y:0}};
+const EXTRA={GRL:'North America',ESH:'Africa',TWN:'Asia',PRI:'North America',FLK:'South America',GUF:'South America',NCL:'Oceania',KOS:'Europe',XKX:'Europe',SOL:'Africa',CYN:'Asia',ATA:'Antarctica',ATF:'Antarctica',PYF:'Oceania'};
+function heat(m){return m<=0?'#cfd6e4':m<.2?'#f4a261':m<.4?'#f6c453':m<.7?'#b5d86b':'#4cae7a'}
+
+function initMapData(){
+  if(M.feats.length)return;
+  try{
+    let topo=window.Datamap&&Datamap.prototype&&Datamap.prototype.worldTopo;
+    if(typeof topo==='string')topo=JSON.parse(topo);
+    if(!topo||!topo.objects||!topo.arcs)return;
+    const tr=topo.transform;
+    const arcs=topo.arcs.map(a=>{let x=0,y=0;return a.map(p=>{if(tr){x+=p[0];y+=p[1];return[x*tr.scale[0]+tr.translate[0],y*tr.scale[1]+tr.translate[1]]}return[p[0],p[1]]})});
+    const ring=idx=>{const pts=[];idx.forEach(i=>{const a=i<0?arcs[~i].slice().reverse():arcs[i];for(let j=pts.length?1:0;j<a.length;j++)pts.push(a[j])});return pts};
+    const obj=topo.objects[Object.keys(topo.objects)[0]];
+    obj.geometries.forEach(g=>{
+      let polys=[];if(g.type==='Polygon')polys=[g.arcs.map(ring)];else if(g.type==='MultiPolygon')polys=g.arcs.map(p=>p.map(ring));else return;
+      const f={id:g.id,name:(g.properties||{}).name||g.id,d:'',area:0,box:[1e9,1e9,-1e9,-1e9],geo:[0,0]};let best=0;
+      polys.forEach(poly=>poly.forEach((r,ri)=>{let a=0,prev=null,sx=0,sy=0;
+        r.forEach((p,i)=>{const x=px(p[0]),y=py(p[1]);f.d+=(i===0||Math.abs(p[0]-prev)>180?'M':'L')+x.toFixed(1)+' '+y.toFixed(1);prev=p[0];
+          if(x<f.box[0])f.box[0]=x;if(y<f.box[1])f.box[1]=y;if(x>f.box[2])f.box[2]=x;if(y>f.box[3])f.box[3]=y;
+          const q=r[(i+1)%r.length];a+=x*py(q[1])-px(q[0])*y;sx+=p[0];sy+=p[1]});
+        f.d+='Z';a=Math.abs(a)/2;if(ri===0){f.area+=a;if(a>best){best=a;f.geo=[sx/r.length,sy/r.length]}}}));
+      const c=C3[f.id];
+      if(c)f.cont=c.cont;else if(EXTRA[f.id])f.cont=EXTRA[f.id];
+      else{let bd=1e9,bc=null;C.forEach(x=>{const d=dist({lat:f.geo[1],lng:f.geo[0]},x);if(d<bd){bd=d;bc=x}});f.cont=bc?bc.cont:'Africa'}
+      M.feats.push(f);M.byId[f.id]=f;
+    });
+    M.ok=M.feats.length>50;
+  }catch(e){M.ok=false;M.feats=[];M.byId={}}
+}
+window.addEventListener('load',()=>{initMapData();updateStatus()});
+if(document.readyState==='complete'){initMapData()}
+
+function mapMarks(){return C.filter(c=>{const f=M.byId[c.iso3];return !M.ok||!f||f.area<14})}
+function el(tag,at,parent){const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);if(parent)parent.appendChild(e);return e}
+
+VIEWS.map=function(){
+  if(!M.feats.length&&!M.ok)initMapData();
+  M.answered=false;M.V={k:1,x:0,y:0};
+  view.innerHTML=
+  (M.ok?'':'<div class="banner">The world map shapes could not load, so this is a dot map: each dot is a country (dots sit on the capital). Reload when you are online to get the full map.</div>')+
+  '<div class="row wrap sp"><div class="chips" id="mmodes">'+
+    [['explore','Explore'],['locate','Find the country'],['continent','Find the continent'],['name','Name the country']].map(m=>'<span class="chip '+(M.mode===m[0]?'on':'')+'" data-act="mmode" data-v="'+m[0]+'">'+m[1]+'</span>').join('')+'</div>'+
+    '<label class="small">Continent <select data-chg="mcont" id="mcont"><option>All</option>'+CONTS.map(c=>'<option>'+c+'</option>').join('')+'</select></label></div>'+
+  '<div class="prompt" id="mprompt"></div>'+
+  '<div class="mapwrap"><div id="mapmount"></div><div class="zoomctl"><button data-act="mzin" aria-label="Zoom in">+</button><button data-act="mzout" aria-label="Zoom out">−</button><button data-act="mzreset" aria-label="Reset view">⟲</button></div></div>'+
+  '<div id="mpanel"></div>'+
+  '<div class="legend" id="mlegend"></div>';
+  $('#mcont').value=S.cfg.cont;
+  buildMap();setMode(M.mode);
+};
+ACT.mcont=a=>{S.cfg.cont=a.value;save();M.queue=[];setMode(M.mode)};
+ACT.mmode=a=>{$$('#mmodes .chip').forEach(c=>c.classList.toggle('on',c===a));setMode(a.dataset.v)};
+ACT.mzin=()=>zoomAt(MW/2,MH/2,M.V.k*1.6);
+ACT.mzout=()=>zoomAt(MW/2,MH/2,M.V.k/1.6);
+ACT.mzreset=()=>animateTo(1,0,0);
+ACT.mcolor=a=>{M.color=a.dataset.v;setMode('explore')};
+
+let mapSvg=null,mapG=null,pingG=null;
+function buildMap(){
+  const mount=$('#mapmount');mount.innerHTML='';
+  const svg=el('svg',{viewBox:'0 0 '+MW+' '+MH,class:'map by-cont'});
+  el('rect',{width:MW,height:MH,class:'ocean'},svg);
+  const g=el('g',{},svg);
+  let gd='';for(let lo=-150;lo<=180;lo+=30)gd+='M'+px(lo)+' 0V'+MH;for(let la=-60;la<=90;la+=30)gd+='M0 '+py(la)+'H'+MW;
+  el('path',{d:gd,class:'grat'},g);
+  M.shapeEl={};M.markEl={};
+  M.feats.forEach(f=>{M.shapeEl[f.id]=el('path',{d:f.d,class:'shape','data-id':f.id,'data-cont':f.cont},g)});
+  mapMarks().forEach(c=>{M.markEl[c.iso2]=el('circle',{cx:px(c.lng).toFixed(1),cy:py(c.lat).toFixed(1),r:4,class:'mk','data-iso2':c.iso2,'data-cont':c.cont},g)});
+  pingG=el('g',{'pointer-events':'none'},g);
+  mount.appendChild(svg);mapSvg=svg;mapG=g;applyView();
+  svg.addEventListener('click',onMapClick);
+  svg.addEventListener('mouseover',onMapHover);svg.addEventListener('mousemove',onMapHover);svg.addEventListener('mouseleave',()=>{$('#tip').style.display='none'});
+  svg.addEventListener('wheel',e=>{e.preventDefault();const p=svgPt(e);zoomAt(p[0],p[1],M.V.k*Math.pow(1.0018,-e.deltaY))},{passive:false});
+  svg.addEventListener('pointerdown',onPtrDown);
+  svg.addEventListener('dblclick',e=>{const p=svgPt(e);zoomAt(p[0],p[1],M.V.k*1.8)});
+}
+function svgPt(e){const r=mapSvg.getBoundingClientRect(),s=MW/r.width;return[(e.clientX-r.left)*s,(e.clientY-r.top)*s]}
+function applyView(){const V=M.V;mapG.setAttribute('transform','translate('+V.x.toFixed(1)+' '+V.y.toFixed(1)+') scale('+V.k.toFixed(3)+')');const r=(4.2/Math.pow(V.k,.75)).toFixed(2);$$('.mk',mapG).forEach(m=>m.setAttribute('r',r))}
+function clampView(V){V.k=clamp(V.k,1,24);V.x=clamp(V.x,MW-MW*V.k,0);V.y=clamp(V.y,MH-MH*V.k,0)}
+function zoomAt(x,y,k){const V=M.V;k=clamp(k,1,24);V.x=x-(x-V.x)*k/V.k;V.y=y-(y-V.y)*k/V.k;V.k=k;clampView(V);applyView()}
+let anim=null;
+function animateTo(k,x,y){const V=M.V,from={k:V.k,x:V.x,y:V.y},to={k:clamp(k,1,24),x:x,y:y},t0=performance.now(),D=600;cancelAnimationFrame(anim);
+  (function step(t){const u=clamp((t-t0)/D,0,1),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;V.k=from.k+(to.k-from.k)*e;V.x=from.x+(to.x-from.x)*e;V.y=from.y+(to.y-from.y)*e;clampView(V);applyView();if(u<1)anim=requestAnimationFrame(step)})(t0)}
+function focusBox(x0,y0,x1,y1,maxK,pad){const k=clamp(pad*Math.min(MW/Math.max(x1-x0,1),MH/Math.max(y1-y0,1)),1,maxK);const cx=(x0+x1)/2,cy=(y0+y1)/2;animateTo(k,MW/2-k*cx,MH/2-k*cy)}
+const CBOX={'Africa':[-20,-36,52,38],'Asia':[25,-11,150,56],'Europe':[-12,35,45,70],'North America':[-170,6,-50,72],'South America':[-84,-56,-33,14],'Oceania':[110,-48,180,2]};
+function focusCont(ct){const b=CBOX[ct];if(!b){animateTo(1,0,0);return}focusBox(px(b[0]),py(b[3]),px(b[2]),py(b[1]),8,.92)}
+function focusCountry(c){const f=M.byId[c.iso3];if(f&&f.area>=14)focusBox(f.box[0],f.box[1],f.box[2],f.box[3],7,.45);else{const k=7;animateTo(k,MW/2-k*px(c.lng),MH/2-k*py(c.lat))}}
+function ping(c){pingG.innerHTML='';const cx=px(c.lng),cy=py(c.lat),k=M.V.k;
+  const r=el('circle',{cx:cx,cy:cy,r:6/k,fill:'none',stroke:'var(--brand)','stroke-width':3,'vector-effect':'non-scaling-stroke'},pingG);
+  const a=el('animate',{attributeName:'r',from:4/k,to:34/k,dur:'1.2s',repeatCount:'indefinite'},r);const o=el('animate',{attributeName:'stroke-opacity',from:1,to:0,dur:'1.2s',repeatCount:'indefinite'},r)}
+
+/* pan / pinch */
+const ptrs=new Map();let pinchD=0,pdStart=null;
+function onPtrDown(e){ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptrs.size===1){M.moved=false;pdStart={x:e.clientX,y:e.clientY}}if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinchD=Math.hypot(a.x-b.x,a.y-b.y);M.moved=true}cancelAnimationFrame(anim)}
+window.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p||!mapSvg)return;
+  if(ptrs.size===1){if(Math.hypot(e.clientX-pdStart.x,e.clientY-pdStart.y)>5)M.moved=true;if(M.moved){const s=MW/mapSvg.getBoundingClientRect().width;M.V.x+=(e.clientX-p.x)*s;M.V.y+=(e.clientY-p.y)*s;clampView(M.V);applyView()}p.x=e.clientX;p.y=e.clientY}
+  else if(ptrs.size===2){p.x=e.clientX;p.y=e.clientY;const[a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(pinchD>0){const pt=svgPt({clientX:(a.x+b.x)/2,clientY:(a.y+b.y)/2});zoomAt(pt[0],pt[1],M.V.k*d/pinchD)}pinchD=d}});
+['pointerup','pointercancel'].forEach(ev=>window.addEventListener(ev,e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinchD=0}));
+
+/* hover tooltip (explore only) */
+function onMapHover(e){const t=$('#tip');if(M.mode!=='explore'){t.style.display='none';return}const n=e.target.closest('.shape,.mk');if(!n){t.style.display='none';return}
+  const c=n.dataset.iso2?C2[n.dataset.iso2]:C3[n.dataset.id];t.textContent=c?c.name:(M.byId[n.dataset.id]||{}).name||'';t.style.left=(e.clientX+12)+'px';t.style.top=(e.clientY+12)+'px';t.style.display=t.textContent?'block':'none'}
+
+/* modes */
+function clearMarks(){$$('.shape,.mk',mapG).forEach(n=>n.classList.remove('ok','bad','tgt','dim'));pingG.innerHTML=''}
+function setMode(mode){
+  M.mode=mode;clearTimeout(M.timer);clearMarks();M.answered=false;M.cur=null;
+  const filt=S.cfg.cont;
+  mapSvg.setAttribute('class','map '+(mode==='explore'?(M.color==='heat'?'by-heat':'by-cont'):mode==='locate'?'by-cont':'neutral'));
+  // mastery colors
+  $$('.shape',mapG).forEach(n=>{n.style.fill=''});$$('.mk',mapG).forEach(n=>{n.style.fill=''});
+  if(mode==='explore'&&M.color==='heat'){$$('.shape',mapG).forEach(n=>{const c=C3[n.dataset.id];n.style.fill=c?heat(mastery(c)):'var(--land)'});$$('.mk',mapG).forEach(n=>{n.style.fill=heat(mastery(C2[n.dataset.iso2]))})}
+  // legend
+  $('#mlegend').innerHTML=(mode==='explore'||mode==='locate')&&M.color!=='heat'?ALLCONTS.slice(0,6).map(c=>'<span><i style="background:'+CONTCSS[c]+'"></i>'+c+'</span>').join('')+'<span>Dots = tiny countries</span>':
+    (mode==='explore'?'<span><i style="background:#cfd6e4"></i>not started</span><span><i style="background:#f4a261"></i>learning</span><span><i style="background:#f6c453"></i>getting there</span><span><i style="background:#b5d86b"></i>good</span><span><i style="background:#4cae7a"></i>mastered</span>':'<span>Scroll or pinch to zoom, drag to move. Dots = tiny countries.</span>');
+  if(mode==='explore'){
+    $('#mprompt').className='prompt';$('#mprompt').innerHTML='<div class="q">Tap any country to learn it.</div><div class="chips"><span class="chip '+(M.color==='cont'?'on':'')+'" data-act="mcolor" data-v="cont">Continents</span><span class="chip '+(M.color==='heat'?'on':'')+'" data-act="mcolor" data-v="heat">My progress</span></div>';
+    $('#mpanel').innerHTML='';
+    if(filt==='All')animateTo(1,0,0);else focusCont(filt);
+    return;
+  }
+  if(filt!=='All'&&mode!=='continent'){
+    $$('.shape',mapG).forEach(n=>{const f=M.byId[n.dataset.id];if(f&&f.cont!==filt)n.classList.add('dim')});
+    $$('.mk',mapG).forEach(n=>{if(C2[n.dataset.iso2].cont!==filt)n.classList.add('dim')});
+  }
+  if(mode!=='name'){if(filt!=='All'&&mode==='locate')focusCont(filt);else animateTo(1,0,0)}
+  mapNext();
+}
+function scoreHTML(){return '<span class="score">✓ '+M.r+'  ✗ '+M.w+'  🔥 '+M.streak+'</span>'}
+function mapNext(){
+  clearTimeout(M.timer);clearMarks();M.answered=false;
+  const filt=S.cfg.cont;
+  if(filt!=='All'&&M.mode!=='continent'){
+    $$('.shape',mapG).forEach(n=>{const f=M.byId[n.dataset.id];if(f&&f.cont!==filt)n.classList.add('dim')});
+    $$('.mk',mapG).forEach(n=>{if(C2[n.dataset.iso2].cont!==filt)n.classList.add('dim')});
+  }
+  const P=$('#mprompt'),panel=$('#mpanel');P.className='prompt';panel.innerHTML='';
+  if(M.mode==='locate'){
+    if(!M.queue.length||M.queue[0].t!=='loc')M.queue=buildQueue(['loc'],filt,10);
+    M.cur=M.queue.shift();
+    P.innerHTML='<div class="q">Find: <b>'+esc(M.cur.c.name)+'</b></div>'+scoreHTML();
+  }else if(M.mode==='continent'){
+    const keys=ALLCONTS.map(c=>'@'+c+':loc');const k=pickKey(keys);M.cur={key:k,cont:k.slice(1,-4)};
+    P.innerHTML='<div class="q">Tap any country in <b>'+esc(M.cur.cont)+'</b></div>'+scoreHTML();
+  }else if(M.mode==='name'){
+    if(!M.queue.length||M.queue[0].t!=='id')M.queue=buildQueue(['id'],filt,10);
+    M.cur=M.queue.shift();const c=M.cur.c;
+    const node=M.markEl[c.iso2]&&!M.byId[c.iso3]?M.markEl[c.iso2]:M.shapeEl[c.iso3]||M.markEl[c.iso2];
+    if(node)node.classList.add('tgt');if(M.markEl[c.iso2]&&M.shapeEl[c.iso3])M.markEl[c.iso2].classList.add('tgt');
+    ping(c);focusCountry(c);
+    const opts=shuffle([c].concat(nearby(c)));
+    P.innerHTML='<div class="q">Which country is highlighted?</div>'+scoreHTML();
+    panel.innerHTML='<div class="choices">'+opts.map((o,i)=>'<button class="choice" data-act="mchoose" data-v="'+o.iso2+'">'+(i+1)+'. '+esc(o.name)+'</button>').join('')+'</div>';
+  }
+}
+function onMapClick(e){
+  if(M.moved)return;
+  const n=e.target.closest('.shape,.mk');if(!n)return;
+  const c=n.dataset.iso2?C2[n.dataset.iso2]:C3[n.dataset.id];
+  const f=n.dataset.id?M.byId[n.dataset.id]:null;
+  if(M.mode==='explore'){showInfo(c,f);return}
+  if(M.answered)return;
+  if(M.mode==='locate'){
+    const ok=!!c&&c.iso2===M.cur.c.iso2;
+    n.classList.add(ok?'ok':'bad');
+    if(!ok){const t=M.shapeEl[M.cur.c.iso3],m=M.markEl[M.cur.c.iso2];if(t)t.classList.add('ok');if(m)m.classList.add('ok');ping(M.cur.c)}
+    mapResult(ok,M.cur.c.iso2+':loc',ok?'Correct! '+M.cur.c.name:(c?'That is '+c.name:'That is '+((f&&f.name)||'a territory'))+'. '+M.cur.c.name+' is highlighted.',ok?900:2200);
+    if(!ok)M.queue.splice(Math.min(M.queue.length,2),0,M.cur);
+  }else if(M.mode==='continent'){
+    const cont=c?c.cont:(f?f.cont:'');const ok=cont===M.cur.cont;
+    $$('.shape,.mk',mapG).forEach(x=>{const xc=x.dataset.iso2?C2[x.dataset.iso2].cont:(M.byId[x.dataset.id]||{}).cont;if(xc===M.cur.cont)x.classList.add('ok')});
+    if(!ok)n.classList.add('bad');
+    mapResult(ok,M.cur.key,ok?'Correct! '+M.cur.cont:'That is '+(cont||'somewhere else')+'. '+M.cur.cont+' is in green.',ok?1000:2400);
+  }
+}
+ACT.mchoose=a=>{if(M.answered)return;const ok=a.dataset.v===M.cur.c.iso2;
+  $$('#mpanel .choice').forEach(b=>{b.disabled=true;if(b.dataset.v===M.cur.c.iso2)b.classList.add('ok');else if(b===a)b.classList.add('bad')});
+  const c=M.cur.c;mapResult(ok,c.iso2+':id',(ok?'Correct! ':'Not quite. ')+c.name+' • capital: '+c.cap,ok?1200:2600);
+  if(!ok)M.queue.splice(Math.min(M.queue.length,2),0,M.cur)};
+function mapResult(ok,key,msg,delay){
+  M.answered=true;grade(key,ok);if(ok){M.r++;M.streak++}else{M.w++;M.streak=0}
+  const P=$('#mprompt');P.className='prompt '+(ok?'ok':'bad');P.innerHTML='<div class="q">'+(ok?'✓ ':'✗ ')+esc(msg)+'</div><div class="row">'+scoreHTML()+'<button class="btn sm primary" data-act="mnext">Next →</button></div>';
+  M.timer=setTimeout(mapNext,delay);
+}
+ACT.mnext=()=>mapNext();
+function showInfo(c,f){
+  const P=$('#mpanel');
+  if(!c){P.innerHTML='<div class="card" style="margin-top:10px"><b>'+esc((f&&f.name)||'Territory')+'</b><div class="mute small">Not an independent country in this list.</div></div>';return}
+  const m=mastery(c);
+  P.innerHTML='<div class="card info" style="margin-top:10px">'+flagHTML(c,'lg')+'<div style="flex:1;min-width:200px"><h2 style="margin:0">'+esc(c.name)+'</h2><div>Capital: <b>'+esc(c.cap)+'</b></div><div>Continent: <b>'+esc(c.cont)+'</b></div>'+(CAPNOTE[c.iso2]?'<div class="note">'+esc(CAPNOTE[c.iso2])+'</div>':'')+'<div class="bar" style="margin-top:8px"><i style="width:'+Math.round(m*100)+'%"></i></div><div class="small mute">Mastery '+Math.round(m*100)+'%</div></div></div>';
+  hydrateFlags(P);
+}
+document.addEventListener('keydown',e=>{if(location.hash!=='#map'||!M.cur)return;const t=e.target.tagName;if(t==='INPUT'||t==='SELECT')return;
+  if(M.mode==='name'&&!M.answered){const n=+e.key;if(n>=1&&n<=4){const b=$$('#mpanel .choice')[n-1];if(b)b.click()}}
+  if(M.answered&&(e.code==='Space'||e.key==='Enter')&&t!=='BUTTON'){e.preventDefault();mapNext()}});
+
+/* start */
+initMapData();
+route();
+if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+</script>
+</body>
+</html>
